@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+{% block title %}Medical Diet Navigator{% endblock %}
+
+{% block content %}
+
+<div class="chat-wrap">
+  <div id="messages" class="messages" aria-live="polite">
+    <div id="thinking-row" class="msg bot">
+      <span id="thinking" class="thinking" aria-live="polite">
+        Thinking<span class="dots"><span></span><span></span><span></span></span>
+      </span>
+    </div>
+  </div>
+
+  <form id="chatForm" class="composer" autocomplete="off">
+    <textarea id="prompt" placeholder="Ask about meal plans, macros, allergens…" enterkeyhint="send"></textarea>
+    <div>
+      <button type="submit">Send</button>
+
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const messagesEl = document.getElementById('messages');
+  const form = document.getElementById('chatForm');
+  const promptEl = document.getElementById('prompt');
+
+  let isComposing = false;
+  promptEl.addEventListener('compositionstart', () => { isComposing = true; });
+  promptEl.addEventListener('compositionend', () => { isComposing = false; });
+
+  // Enter to send, Shift+Enter to newline
+  promptEl.addEventListener('keydown', (e) => {
+    if (isComposing) return;                          // respect IME
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();                             // don’t insert newline
+      // Trigger your existing submit handler
+      if (typeof form.requestSubmit === 'function') { // modern browsers
+        form.requestSubmit();
+      } else {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
+  });
+
+  // Grab the existing indicator you put inside #messages
+  const thinking = document.getElementById('thinking');
+
+  function showThinking() {
+    // Re-append so it's always the LAST child
+    messagesEl.appendChild(thinking);
+    thinking.classList.add('show');
+    // Scroll to bottom so it's visible
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  function hideThinking() {
+    thinking.classList.remove('show');
+  }
+
+  function addMsg(role, text) {
+    const row = document.createElement('div');
+    row.className = 'msg ' + role;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerText = text;
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const prompt = promptEl.value.trim();
+    if (!prompt) return;
+
+    addMsg('user', prompt);
+    promptEl.value = '';
+    showThinking();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+      hideThinking();               // hide before adding bot reply
+      addMsg('bot', data.reply || '');
+    } catch (err) {
+      hideThinking();
+      addMsg('bot', '⚠️ ' + err.message);
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,524 @@
+/* Reset / Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f9f9f9;
+  /*padding-bottom: 60px;  for footer spacing */
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1E71D6;
+  color: white;
+  padding: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+  margin-right: 12px;
+}
+
+nav a {
+  color: #ecf0f1;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+
+header {
+  background-color: #1E71D6;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin-bottom: 10px;
+}
+
+nav a {
+  color: #ecf0f1;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  max-width: 90%;
+  margin: auto;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+h2 {
+  margin-top: 20px;
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: normal
+}
+
+p {
+  margin: 15px 0;
+}
+
+ol {
+  padding: 20px;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1E71D6;
+  color: #ccc;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical; /* Allows vertical resizing but prevents horizontal resizing */
+  box-sizing: border-box; /* Ensures padding doesn't exceed 100% width */
+}
+
+input[type="text"], input[type="url"]{
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 15px; /* optional, for spacing between fields */
+}
+
+button {
+  background-color: #1E71D6; /* Modern blue */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  /* ✅ Add spacing below */
+  margin-bottom: 12px; 
+}
+
+button:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+button:active {
+  background-color: #1c6690;
+  transform: translateY(0);
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+hr {
+  margin: 20px 0; /* 40px above and below the <hr> */
+}
+
+/* Full-page overlay */
+#spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.6); /* light transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Hide it by default */
+#spinner-overlay.hidden {
+  display: none;
+}
+
+/* Spinner itself */
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spaced-box {
+    margin: 20px;    /* space outside the div */
+    padding: 15px;   /* space inside the div */
+    background-color: #f0f0f0; /* optional, just to see padding effect */
+  }
+
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background-color: #f7f7f7;
+  font-weight: 600;
+  color: #333;
+}
+
+tr:hover {
+  background-color: #f0f8ff;
+  cursor: pointer;
+}
+
+td a {
+  color: #007BFF;
+  text-decoration: none;
+}
+
+td a:hover {
+  text-decoration: underline;
+}
+
+
+#modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* gray out */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#instructions-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+#markdown-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#markdown-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+#markdown-modal pre {
+  margin-top: 10px;
+}
+
+/* ============STYLES for Content Element  =========== */
+#content h1, #content h2, #content h3 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+#content p {
+    margin: 0.5em 0;
+}
+
+#content pre {
+    background: #f6f8fa;
+    padding: 1em;
+    overflow-x: auto;
+}
+
+#content code {
+    background: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Add this if needed, or just use #content */
+.rendered-content {
+  border: 1px solid #ccc;
+  padding: 10px;
+  min-height: 200px;
+  overflow-y: auto;
+}
+/* ============END STYLES for Content Element  =========== */
+
+.hidden {
+  display: none;
+}
+
+  :root {
+    --page-bg: #ffffff;
+    --ink: #0f172a;
+    /* dark text */
+    --muted: #64748b;
+    /* secondary text */
+    --border: #e5e7eb;
+    /* thin gray borders */
+    --accent: #1E71D6;
+    /* your brand blue */
+    --user-bubble: #f1f5f9;
+    /* light gray bubble */
+    --user-border: #e2e8f0;
+    /* slightly darker edge */
+  }
+
+  /* Page + overall layout */
+  body {
+    background: var(--page-bg);
+    color: var(--ink);
+  }
+
+  .chat-wrap {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: .75rem;
+    /* Let the chat dominate the screen */
+    height: calc(100vh - 120px);
+  }
+
+  /* Messages panel */
+  .messages {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    overflow: auto;
+  }
+
+  /* Each message row spans full width; we align content per role */
+  .msg {
+    width: 100%;
+    display: flex;
+    margin: .75rem 0;
+  }
+
+  .msg.user {
+    justify-content: flex-end;
+  }
+
+  .msg.bot {
+    justify-content: flex-start;
+  }
+
+  /* Shared “bubble” node the JS already appends.
+     We'll make the bot's "bubble" look like plain text. */
+  .bubble {
+    max-width: min(72ch, 100%);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* User: right side gray bubble */
+  .user .bubble {
+    background: var(--user-bubble);
+    color: var(--ink);
+    border: 1px solid var(--user-border);
+    border-radius: 14px;
+    padding: .75rem 1rem;
+  }
+
+  /* Bot: left side, no bubble styling — just text */
+  .bot .bubble {
+    background: transparent;
+    border: none;
+    padding: 0;
+    /* looks like regular text block */
+    color: var(--ink);
+  }
+
+  /* Composer (input area) */
+  .composer {
+    position: sticky;
+    /* keeps the composer visible near bottom */
+    bottom: 0;
+    background: #fff;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .6rem;
+    align-items: center;
+    padding-top: .25rem;
+  }
+
+  textarea {
+    min-height: 64px;
+    max-height: 220px;
+    resize: vertical;
+    background: #ffffff;
+    /* white field */
+    color: var(--ink);
+    border: 1px solid var(--border);
+    /* thin gray border */
+    border-radius: 14px;
+    padding: .9rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(30, 113, 214, 0.15);
+  }
+
+  button {
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: .9rem 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 110px;
+  }
+
+  button:hover {
+    filter: brightness(1.05);
+  }
+
+  /* Thinking indicator */
+  .thinking {
+    display: none;
+    color: var(--muted);
+    font-size: .9rem;
+    margin-left: .5rem;
+  }
+
+  .thinking.show {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+  }
+
+  /* Animated dot trio */
+  .thinking .dots {
+    display: inline-block;
+    width: 28px;
+    text-align: left;
+  }
+
+  .thinking .dots>span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 0 1px;
+    background: currentColor;
+    border-radius: 50%;
+    animation: thinking-bounce 1.2s infinite ease-in-out both;
+  }
+
+  .thinking .dots>span:nth-child(2) {
+    animation-delay: .15s;
+  }
+
+  .thinking .dots>span:nth-child(3) {
+    animation-delay: .30s;
+  }
+
+  @keyframes thinking-bounce {
+
+    0%,
+    80%,
+    100% {
+      transform: translateY(0);
+      opacity: .35;
+    }
+
+    40% {
+      transform: translateY(-3px);
+      opacity: 1;
+    }
+  }

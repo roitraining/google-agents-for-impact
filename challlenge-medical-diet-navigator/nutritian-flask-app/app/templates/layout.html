@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Website{% endblock %}</title>
+
+    <!-- Meta tags for responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <header class="site-header">
+        <div>
+            <h1>Medical Diet Navigator</h1>
+        </div>
+        <nav>
+            <a href="{{ url_for('home.home') }}">New Chat</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Spinner Overlay -->
+        <div id="spinner-overlay" class="hidden">
+            <div class="spinner"></div>
+        </div>
+
+        {% block content %}
+        <!-- Child templates insert their page content here -->
+        {% endblock %}
+    </main>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
