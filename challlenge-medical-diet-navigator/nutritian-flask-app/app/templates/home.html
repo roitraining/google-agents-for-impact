@@ -23,6 +23,13 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+<script>
+  // Optional: tweak markdown behavior
+  marked.setOptions({ gfm: true, breaks: true });
+</script>
+
 <script>
   const messagesEl = document.getElementById('messages');
   const form = document.getElementById('chatForm');
@@ -63,9 +70,19 @@
   function addMsg(role, text) {
     const row = document.createElement('div');
     row.className = 'msg ' + role;
+
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.innerText = text;
+
+    if (role === 'bot') {
+      // Convert MD -> HTML and sanitize before injecting
+      const html = marked.parse(text || '');
+      bubble.innerHTML = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+    } else {
+      // Keep user text as plain text
+      bubble.innerText = text;
+    }
+
     row.appendChild(bubble);
     messagesEl.appendChild(row);
     messagesEl.scrollTop = messagesEl.scrollHeight;

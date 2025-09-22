@@ -522,3 +522,14 @@ td a:hover {
       opacity: 1;
     }
   }
+
+  /* Bot content is rendered HTML; avoid pre-wrap to keep lists/paragraphs tidy */
+.bot .bubble { white-space: normal; }
+
+/* Markdown niceties */
+.messages h1, .messages h2, .messages h3 { margin: .6rem 0 .4rem; }
+.messages p { margin: .5rem 0; }
+.messages ul, .messages ol { margin: .5rem 0 .5rem 1.25rem; }
+.messages code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95em; }
+.messages pre { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: .8rem; overflow: auto; }
+.messages a { color: #1E71D6; text-decoration: underline; }
