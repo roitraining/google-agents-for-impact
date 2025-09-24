@@ -32,7 +32,6 @@ bq_tools = BigQueryToolset(
     bigquery_tool_config=bq_tool_cfg
 )
 
-
 # Instruct the agent to **only** use your dataset
 INSTR = f"""
 You are a data analysis agent with access to BigQuery tools.
@@ -43,6 +42,11 @@ Never perform DDL/DML; SELECT-only. Return the SQL you ran along with a concise 
 Here is the database schema, please study it {DB_SCHEMA}
 """
 
+agent_generation = types.GenerateContentConfig(
+    temperature=0.6,
+    top_p=0.9,
+    max_output_tokens=32768,
+)  
 
 
 usda_bigquery_agent = Agent(
@@ -51,4 +55,5 @@ usda_bigquery_agent = Agent(
     description="""Analyzes tables in a BigQuery dataset that contains food information from the USDA. Tables.""",
     instruction=INSTR,
     tools=[bq_tools],
+    generate_content_config=agent_generation,
 )

@@ -13,6 +13,7 @@ from google.adk.tools import google_search   # built-in Google Search tool
 
 from app.bq_agent import usda_bigquery_agent
 from app.allergen_agent import allergen_research_agent
+from app.image_agent import image_agent
 
 
 _, project_id = google.auth.default()
@@ -21,6 +22,12 @@ os.environ.setdefault("GOOGLE_CLOUD_LOCATION", "global")
 os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
 
 MODEL = "gemini-2.5-flash"
+
+agent_generation = types.GenerateContentConfig(
+    temperature=0.6,
+    top_p=0.9,
+    max_output_tokens=32768,
+)  
 
 
 MAIN_AGENT_INSTRUCTIONS="""
@@ -36,5 +43,6 @@ root_agent = Agent(
     model=MODEL,
     description="Provides Answers to Users Food and Allergy Questions.",
     instruction=MAIN_AGENT_INSTRUCTIONS,
-    sub_agents=[usda_bigquery_agent, allergen_research_agent],
+    sub_agents=[usda_bigquery_agent, allergen_research_agent, image_agent],
+    generate_content_config=agent_generation,
 )
