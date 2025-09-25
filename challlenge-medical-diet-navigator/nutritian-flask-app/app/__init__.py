@@ -1,7 +1,6 @@
 # app/__init__.py
 from flask import Flask, render_template
 from config import Config  # Or dynamically choose config based on FLASK_ENV
-from app.auth import current_user_id
 
 
 def create_app():
@@ -18,8 +17,5 @@ def create_app():
         app.logger.exception("Unhandled Exception: %s", e)
         return render_template("error.html", error_message=str(e)), 500
     
-    @app.context_processor
-    def inject_user():
-        return {"current_user": current_user_id()}
 
     return app

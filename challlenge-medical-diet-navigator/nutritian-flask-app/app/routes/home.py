@@ -1,10 +1,8 @@
 # app/routes/home.py
 from __future__ import annotations
 from flask import Blueprint, render_template, request, jsonify, session as flask_session, current_app
-import os, asyncio, uuid, logging
+import os, asyncio, uuid, logging, threading
 
-
-import vertexai
 from vertexai import agent_engines
 
 logging.basicConfig(level=logging.INFO)
@@ -14,8 +12,21 @@ RE_FULL = "projects/cool-benefit-472616-t9/locations/us-central1/reasoningEngine
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "cool-benefit-472616-t9")
 LOCATION = "us-central1"
 
-vertexai.init(project=PROJECT_ID, location=LOCATION)
-adk_app = agent_engines.get(RE_FULL)  # Official pattern in docs
+_adk_app = None
+_init_lock = threading.Lock()
+def _get_adk_app():
+    """
+    Lazily import agent_engines, and cache the Agent Engine handle.
+    Safe to be called from multiple threads.
+    """
+    from vertexai import agent_engines
+    global _adk_app
+    with _init_lock:
+        if _adk_app is not None:
+            return _adk_app
+        
+        _adk_app = agent_engines.get(RE_FULL)
+        return _adk_app
 
 def _safe_event_text(ev) -> str:
     """Extract just the assistant-visible text from an Agent Engine event."""
@@ -67,6 +78,8 @@ async def _ensure_session() -> tuple[str, str]:
     Ensure we have a persistent (user_id, session_id) pair stored in the Flask session cookie.
     Creates a new Agent Engine session if missing.
     """
+    adk_app = _get_adk_app()
+
     if "ae_user_id" not in flask_session:
         flask_session["ae_user_id"] = f"web-{uuid.uuid4().hex[:8]}"
     user_id = flask_session["ae_user_id"]
@@ -88,6 +101,7 @@ async def _ask_agent(prompt: str) -> str:
     user_id, session_id = await _ensure_session()
 
     chunks = []
+    adk_app = _get_adk_app()
     async for event in adk_app.async_stream_query(
         user_id=user_id,
         session_id=session_id,            # <- critical for threaded memory
