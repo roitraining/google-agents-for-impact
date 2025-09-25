@@ -1,7 +1,8 @@
 # app/routes/home.py
 from __future__ import annotations
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, render_template, request, jsonify, session as flask_session, current_app
 import os, asyncio, uuid, logging
+
 
 import vertexai
 from vertexai import agent_engines
@@ -61,19 +62,35 @@ def _safe_event_text(ev) -> str:
     # Nothing textual
     return ""
 
+async def _ensure_session() -> tuple[str, str]:
+    """
+    Ensure we have a persistent (user_id, session_id) pair stored in the Flask session cookie.
+    Creates a new Agent Engine session if missing.
+    """
+    if "ae_user_id" not in flask_session:
+        flask_session["ae_user_id"] = f"web-{uuid.uuid4().hex[:8]}"
+    user_id = flask_session["ae_user_id"]
+
+    # Create a new managed session if we don't already have one:
+    if "ae_session_id" not in flask_session:
+        sess = await adk_app.async_create_session(user_id=user_id)
+        # The SDK returns a dict-like object; pull the ID field:
+        session_id = sess.get("id") if isinstance(sess, dict) else getattr(sess, "id", None)
+        if not session_id:
+            raise RuntimeError("Failed to create Agent Engine session (no id returned).")
+        flask_session["ae_session_id"] = session_id
+
+    return user_id, flask_session["ae_session_id"]
+
 
 async def _ask_agent(prompt: str) -> str:
-    """Use async_stream_query; let Agent Engine auto-create a session."""
-    # Give each browser a stable user_id so their context can persist if needed.
-    if "ae_user_id" not in session:
-        session["ae_user_id"] = f"web-{uuid.uuid4().hex[:8]}"
-    user_id = session["ae_user_id"]
+    """Stream a reply within the persistent Agent Engine session."""
+    user_id, session_id = await _ensure_session()
 
     chunks = []
     async for event in adk_app.async_stream_query(
         user_id=user_id,
-        # session_id omitted on purpose — Agent Engine will auto-create one for this query
-        # (per official docs; session_id is optional)
+        session_id=session_id,            # <- critical for threaded memory
         message=prompt,
     ):
         txt = _safe_event_text(event)
@@ -85,6 +102,7 @@ async def _ask_agent(prompt: str) -> str:
 
 @home_bp.route("/", methods=["GET"])
 def home():
+    flask_session.pop("ae_session_id", None)
     return render_template("home.html")
 
 @home_bp.route("/chat", methods=["POST"])
