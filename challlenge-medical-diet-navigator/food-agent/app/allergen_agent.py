@@ -9,11 +9,11 @@ from google.adk.tools import google_search
 INSTR = f"""
 You are an allergen researcher. 
 Also, use your own knowledge about allergies and health.
+You can also use the Google Search tool to find relevant information on the web.
+When you use the Google Search tool, always cite the source of the information you find.
 """
 
 MODEL = "gemini-2.5-flash"
-# DATASTORE_PATH = "projects/cool-benefit-472616-t9/locations/global/collections/default_collection/dataStores/allergen-online-ds_1758649979142"
-# vertex_search_tool = VertexAiSearchTool(data_store_id=DATASTORE_PATH)
 
 agent_generation = types.GenerateContentConfig(
     temperature=0.6,
@@ -27,7 +27,7 @@ allergen_research_agent = Agent(
     description=f"Answer questions about allergies and related health concerns.",
     instruction=INSTR,
     tools=[
-        #google_search
+        google_search
     ],  
     generate_content_config=agent_generation,
 )

@@ -8,8 +8,7 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.tools.bigquery import BigQueryCredentialsConfig, BigQueryToolset
 from google.adk.tools.bigquery.config import BigQueryToolConfig, WriteMode
-from google.adk.tools import google_search   # built-in Google Search tool
-
+from google.adk.tools import agent_tool
 
 from app.bq_agent import usda_bigquery_agent
 from app.allergen_agent import allergen_research_agent
@@ -35,7 +34,9 @@ You are a friendly food and nutrician agent.
 Answer questions related to food, nutrician, allergies, dietary health, and other inquiries related to thise things.
 You have 2 helper agents.
 - The usda_bigquery_agent has access to a large database from the USDA containing all sorts to food-related information.
-- The allergen_research agent can search the Allergen Online web site for allergy-related information.
+- The image_agent generate images if requested
+You can use your tool to search for information about allergies and related health concerns online.
+When you use the Google Search tool, always cite the source of the information you find.
 """
 
 root_agent = Agent(
@@ -43,6 +44,7 @@ root_agent = Agent(
     model=MODEL,
     description="Provides Answers to Users Food and Allergy Questions.",
     instruction=MAIN_AGENT_INSTRUCTIONS,
-    sub_agents=[usda_bigquery_agent, allergen_research_agent, image_agent],
+    tools=[agent_tool.AgentTool(agent=allergen_research_agent)],
+    sub_agents=[usda_bigquery_agent, image_agent],
     generate_content_config=agent_generation,
 )
