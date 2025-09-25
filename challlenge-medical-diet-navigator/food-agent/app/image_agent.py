@@ -8,6 +8,8 @@ from google.genai import types
 from google.cloud import storage
 from google.adk.agents import Agent
 
+from .config import Config
+
 # =========================
 # Config
 # =========================
@@ -83,6 +85,11 @@ def generate_image_tool(
         }
     """
     client = genai.Client(vertexai=True, api_key=None)
+    client = genai.Client(vertexai=True, 
+                          project=Config.GOOGLE_CLOUD_PROJECT, 
+                          location="global")
+
+
 
     contents = [types.Content(role="user", parts=[types.Part.from_text(text=prompt)])]
     # Keep tokens lean: default to IMAGE-only; include TEXT only if requested
