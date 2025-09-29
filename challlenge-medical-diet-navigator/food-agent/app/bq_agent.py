@@ -1,16 +1,8 @@
-# @title Build the BigQuery Agent. Uses the BigQuery tool to access the BQ Dataset created earlier
-
-# @title ADK Imports
-import asyncio
-import os
 import google.auth
 from google.genai import types
 from google.adk.agents import Agent
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
 from google.adk.tools.bigquery import BigQueryCredentialsConfig, BigQueryToolset
 from google.adk.tools.bigquery.config import BigQueryToolConfig, WriteMode
-from google.adk.tools import google_search   # built-in Google Search tool
 
 from .bq_schema import DB_SCHEMA
 from .config import Config

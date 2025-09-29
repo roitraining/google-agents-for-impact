@@ -1,6 +1,4 @@
-from bs4 import BeautifulSoup
 from google.adk.agents import Agent
-from google.adk.tools import VertexAiSearchTool
 from google.genai import types
 from google.adk.tools import google_search 
 
