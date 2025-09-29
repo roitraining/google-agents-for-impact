@@ -12,11 +12,32 @@
     </div>
   </div>
 
-  <form id="chatForm" class="composer" autocomplete="off">
-    <textarea id="prompt" placeholder="Ask about meal plans, foods, allergens, and recipes..." enterkeyhint="send"></textarea>
-    <div>
-      <button type="submit">Send</button>
+  <form id="chatForm" class="chat-composer" autocomplete="off">
+    <!-- Preview ABOVE the textarea -->
+    <div id="imagePreview" class="chat-composer__preview" hidden aria-live="polite">
+      <img id="imageThumb" alt="Attached image preview" />
+      <button type="button" id="removeImage" class="chat-composer__remove" aria-label="Remove image"
+        title="Remove image">✕</button>
+    </div>
 
+    <textarea id="prompt" placeholder="Ask about meal plans, foods, allergens, and recipes..."
+      enterkeyhint="send"></textarea>
+
+    <div class="chat-composer__controls">
+      <input id="imageInput" type="file" accept="image/*" hidden>
+      <button type="button" id="attachBtn" class="chat-composer__icon-btn" title="Attach image"
+        aria-label="Attach image">
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
+          <path
+            d="M16.5 6.5 8.75 14.25a3 3 0 1 1-4.24-4.24l8.49-8.49a5 5 0 1 1 7.07 7.07l-8.49 8.49a7 7 0 1 1-9.9-9.9l7.78-7.78"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <p class="chat-composer__hint">Tip: paste an image directly into the box, or drag &amp; drop it here.</p>
+      <div class="chat-composer__spacer"></div>
+
+      <button type="submit" class="chat-composer__send">Send</button>
     </div>
   </form>
 </div>
@@ -39,19 +60,6 @@
   promptEl.addEventListener('compositionstart', () => { isComposing = true; });
   promptEl.addEventListener('compositionend', () => { isComposing = false; });
 
-  // Enter to send, Shift+Enter to newline
-  promptEl.addEventListener('keydown', (e) => {
-    if (isComposing) return;                          // respect IME
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();                             // don’t insert newline
-      // Trigger your existing submit handler
-      if (typeof form.requestSubmit === 'function') { // modern browsers
-        form.requestSubmit();
-      } else {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }
-  });
 
   // Grab the existing indicator you put inside #messages
   const thinking = document.getElementById('thinking');
@@ -67,50 +75,171 @@
     thinking.classList.remove('show');
   }
 
-  function addMsg(role, text) {
-    const row = document.createElement('div');
-    row.className = 'msg ' + role;
+  function addMsg(role, text, opts = {}) {
+  const row = document.createElement('div');
+  row.className = 'msg ' + role;
 
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
 
-    if (role === 'bot') {
-      // Convert MD -> HTML and sanitize before injecting
-      const html = marked.parse(text || '');
-      bubble.innerHTML = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
-    } else {
-      // Keep user text as plain text
-      bubble.innerText = text;
+  // If it's the USER and there are thumbnails, render them first
+  if (role === 'user' && Array.isArray(opts.thumbs) && opts.thumbs.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'attachments';
+    for (const url of opts.thumbs) {
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'attached image';
+      wrap.appendChild(img);
+      // Optional: revoke object URL later to avoid leaks
+      img.addEventListener('load', () => { try { URL.revokeObjectURL(url); } catch {} }, { once: true });
     }
-
-    row.appendChild(bubble);
-    messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    bubble.appendChild(wrap);
   }
 
+  if (role === 'bot') {
+    const html = marked.parse(text || '');
+    bubble.innerHTML = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+  } else {
+    bubble.appendChild(document.createTextNode(text || ''));
+  }
+
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+
+</script>
+
+<script>
+
+  // NEW elements (IDs must match the HTML above)
+  const imageInput = document.getElementById('imageInput');
+  const attachBtn = document.getElementById('attachBtn');
+  const imagePreview = document.getElementById('imagePreview');
+  const imageThumb = document.getElementById('imageThumb');
+  //const imageNameEl = document.getElementById('imageName');
+  const removeImage = document.getElementById('removeImage');
+
+  let attachedFile = null;
+
+  // Ensure preview is hidden on initial load
+  function hidePreview() {
+    imageThumb.removeAttribute('src');
+    // imageNameEl.textContent = '';
+    imagePreview.hidden = true;
+  }
+  function showPreview(file) {
+    const url = URL.createObjectURL(file);
+    imageThumb.src = url;
+    // imageNameEl.textContent = file.name || file.type || 'image';
+    imagePreview.hidden = false;
+  }
+  function attachFile(file) {
+    if (!file || !file.type?.startsWith('image/')) return;
+    attachedFile = file;
+    showPreview(file);
+  }
+
+  // Button/file-picker
+  attachBtn.addEventListener('click', () => imageInput.click());
+  imageInput.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if (f) attachFile(f);
+    imageInput.value = ''; // allow re-picking same file
+  });
+
+  // Remove (✕)
+  removeImage.addEventListener('click', () => {
+    attachedFile = null;
+    hidePreview();
+  });
+
+  // Paste an image from clipboard into the textarea
+  promptEl.addEventListener('paste', (e) => {
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    for (const item of e.clipboardData.items) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) attachFile(file);
+        break;
+      }
+    }
+  });
+
+  // Drag & drop onto messages or textarea
+  for (const dropTarget of [messagesEl, promptEl]) {
+    dropTarget.addEventListener('dragover', (e) => { e.preventDefault(); messagesEl.classList.add('drag-over'); });
+    dropTarget.addEventListener('dragleave', () => messagesEl.classList.remove('drag-over'));
+    dropTarget.addEventListener('drop', (e) => {
+      e.preventDefault();
+      messagesEl.classList.remove('drag-over');
+      const file = e.dataTransfer?.files?.[0];
+      if (file && file.type.startsWith('image/')) attachFile(file);
+    });
+  }
+
+  // Submit on Enter (no Shift)
+  promptEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
+  // Submit handler (switch to FormData if image attached)
   form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const prompt = promptEl.value.trim();
-    if (!prompt) return;
+  e.preventDefault();
+  const prompt = (promptEl.value || '').trim();
+  if (!prompt && !attachedFile) return;
 
-    addMsg('user', prompt);
-    promptEl.value = '';
-    showThinking();
+  // Build thumbnail URLs for the user bubble (supports single file)
+  const thumbs = [];
+  if (attachedFile) {
+    // reuse preview src if it exists; otherwise create one
+    const url = imageThumb?.src?.startsWith('blob:') ? imageThumb.src : URL.createObjectURL(attachedFile);
+    thumbs.push(url);
+  }
 
-    try {
-      const res = await fetch('/chat', {
+  // 👇 now include the thumbnail(s) in the user bubble
+  addMsg('user', prompt || '(image only)', { thumbs });
+  showThinking();
+
+  try {
+    let res;
+    if (attachedFile) {
+      const fd = new FormData();
+      fd.append('prompt', prompt);
+      fd.append('image', attachedFile, attachedFile.name || 'image.png');
+      res = await fetch('/chat', { method: 'POST', body: fd });
+    } else {
+      res = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Unknown error');
-      hideThinking();               // hide before adding bot reply
-      addMsg('bot', data.reply || '');
-    } catch (err) {
-      hideThinking();
-      addMsg('bot', '⚠️ ' + err.message);
     }
-  });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Unknown error');
+
+    hideThinking();
+    addMsg('bot', data.reply || '');
+  } catch (err) {
+    hideThinking();
+    addMsg('bot', '⚠️ ' + err.message);
+  } finally {
+    attachedFile = null;
+    hidePreview();
+    promptEl.value = '';
+  }
+});
+
+
+  // Safety: make sure it’s hidden on first paint
+  hidePreview();
 </script>
+
+
 {% endblock %}
