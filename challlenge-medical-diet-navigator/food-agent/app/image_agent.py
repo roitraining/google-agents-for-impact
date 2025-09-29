@@ -9,11 +9,7 @@ from google.cloud import storage
 from google.adk.agents import Agent
 
 from .config import Config
-
-# =========================
-# Config
-# =========================
-IMAGE_BUCKET = "food-agent-generated-images-dar"  # must be public
+IMAGE_BUCKET = Config.IMAGE_BUCKET
 
 # =========================
 # Helpers
